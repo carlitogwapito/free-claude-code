@@ -3,6 +3,7 @@
 import json
 
 import pytest
+
 from free_claude_code.runtime.web_tools.client import _parallel_search_results
 
 
@@ -15,7 +16,11 @@ def envelope(payload: object, structured: bool) -> dict[str, object]:
 def test_text_fallback_matches_structured_evidence_without_mutating_input() -> None:
     payload = {
         "results": [
-            {"url": "https://example.com/a", "title": "Example", "excerpts": ["first", "second"]},
+            {
+                "url": "https://example.com/a",
+                "title": "Example",
+                "excerpts": ["first", "second"],
+            },
             {"url": "https://example.com/b", "title": None, "excerpts": ["third"]},
         ]
     }
@@ -30,7 +35,9 @@ def test_text_fallback_matches_structured_evidence_without_mutating_input() -> N
     assert json.dumps(payload, sort_keys=True) == original
 
 
-@pytest.mark.parametrize("structured", [True, False], ids=["structured", "text-fallback"])
+@pytest.mark.parametrize(
+    "structured", [True, False], ids=["structured", "text-fallback"]
+)
 def test_empty_results_are_valid_in_both_formats(structured: bool) -> None:
     assert _parallel_search_results(envelope({"results": []}, structured)) == []
 
@@ -40,7 +47,9 @@ def test_empty_results_are_valid_in_both_formats(structured: bool) -> None:
     [
         {"result": {"content": [{"type": "text", "text": "{not-json"}]}},
         envelope([], False),
-        envelope({"results": [{"url": "https://example.com/a", "excerpts": [42]}]}, True),
+        envelope(
+            {"results": [{"url": "https://example.com/a", "excerpts": [42]}]}, True
+        ),
     ],
     ids=["invalid-json", "non-object-text-result", "non-string-excerpt"],
 )
